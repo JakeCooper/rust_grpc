@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 tonic = "*"
 warp = "*"
+primes = "*"
 prost = "*"
 tokio = { version = "*", features = ["full"] }
 futures = { version = "*" }
