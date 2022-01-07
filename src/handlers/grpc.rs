@@ -45,6 +45,10 @@ impl HandlerTrait for Handler {
 
         // self.clone().ctrl.clone().get_data(); Need to call this function
 
+        self.ctrl.get_data();
+
+        // *(&self.clone()).ctrl.clone().get_data();
+
         self.data
             .lock()
             .unwrap()

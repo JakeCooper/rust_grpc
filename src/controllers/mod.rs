@@ -19,7 +19,7 @@ impl Controller {
         *state = data;
     }
 
-    pub fn get_data(self) -> String {
+    pub fn get_data(&self) -> String {
         self.data.lock().unwrap().to_string()
     }
 }
