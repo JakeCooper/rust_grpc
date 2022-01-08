@@ -1,5 +1,5 @@
+mod controller;
 mod gateway;
-mod greatway;
 mod handlers;
 
 #[tokio::main]

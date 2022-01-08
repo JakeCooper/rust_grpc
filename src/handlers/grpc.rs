@@ -14,19 +14,19 @@ pub mod hello_world {
 
 type Data = Mutex<HashMap<String, String>>;
 
-use super::super::gateway::Gateway;
+use super::super::controller::Controller;
 
 // #[derive(Debug)]
 pub struct Handler {
     data: Data,
-    ctrl: Arc<Gateway>,
+    ctrl: Arc<Controller>,
 }
 
 impl Handler {
     fn new() -> Self {
         Self {
             data: Mutex::new(HashMap::new()),
-            ctrl: Arc::new(Gateway::new()),
+            ctrl: Arc::new(Controller::new()),
         }
     }
 }
@@ -38,21 +38,10 @@ impl HandlerTrait for Handler {
         request: Request<HelloRequest>,
     ) -> Result<Response<HelloReply>, Status> {
         let req = request.into_inner();
-        println!("Name: {:?}", req.name);
-        println!("{:?}", self.data);
 
-        // self.clone().ctrl.clone().get_data(); Need to call this function
-
-        println!("Setting Data: {}", req.name);
+        println!("{}", self.ctrl.read());
 
         self.ctrl.mutate(req.name.to_string());
-
-        self.ctrl.read();
-
-        self.data
-            .lock()
-            .unwrap()
-            .insert(req.name.to_string(), "VALUE!".into());
 
         let reply = hello_world::HelloReply {
             message: format!("Hello {}!", req.name),
