@@ -45,7 +45,11 @@ impl HandlerTrait for Handler {
 
         // self.clone().ctrl.clone().get_data(); Need to call this function
 
-        self.ctrl.get_data();
+        println!("Setting Data: {}", req.name.to_string());
+
+        self.ctrl.set_data(req.name.to_string());
+
+        println!("Data: {}", self.ctrl.get_data());
 
         // *(&self.clone()).ctrl.clone().get_data();
 

@@ -14,7 +14,7 @@ impl Controller {
         return format!("Hello {}", name);
     }
 
-    pub fn set_data(&mut self, data: String) {
+    pub fn set_data(&self, data: String) {
         let mut state = self.data.lock().expect("Could not lock mutex");
         *state = data;
     }
