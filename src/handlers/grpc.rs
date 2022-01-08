@@ -14,19 +14,19 @@ pub mod hello_world {
 
 type Data = Mutex<HashMap<String, String>>;
 
-use super::super::controllers::Controller;
+use super::super::gateway::Gateway;
 
-// #[derive(Debug, Default)]
+// #[derive(Debug)]
 pub struct Handler {
     data: Data,
-    ctrl: Arc<Controller>,
+    ctrl: Arc<Gateway>,
 }
 
 impl Handler {
     fn new() -> Self {
         Self {
             data: Mutex::new(HashMap::new()),
-            ctrl: Arc::new(Controller::new()),
+            ctrl: Arc::new(Gateway::new()),
         }
     }
 }
@@ -41,25 +41,21 @@ impl HandlerTrait for Handler {
         println!("Name: {:?}", req.name);
         println!("{:?}", self.data);
 
-        let name = &req.name;
-
         // self.clone().ctrl.clone().get_data(); Need to call this function
 
-        println!("Setting Data: {}", req.name.to_string());
+        println!("Setting Data: {}", req.name);
 
-        self.ctrl.set_data(req.name.to_string());
+        self.ctrl.mutate(req.name.to_string());
 
-        println!("Data: {}", self.ctrl.get_data());
-
-        // *(&self.clone()).ctrl.clone().get_data();
+        self.ctrl.read();
 
         self.data
             .lock()
             .unwrap()
-            .insert(name.to_string(), "VALUE!".into());
+            .insert(req.name.to_string(), "VALUE!".into());
 
         let reply = hello_world::HelloReply {
-            message: format!("Hello {}!", name.to_string()),
+            message: format!("Hello {}!", req.name),
         };
 
         Ok(Response::new(reply))
