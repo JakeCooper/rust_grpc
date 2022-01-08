@@ -1,25 +1,24 @@
-use std::sync::Mutex;
+use super::gateways::Gateway;
 
 pub struct Controller {
-    pub data: Mutex<String>,
+    pub gwty: Gateway,
 }
 
 impl Controller {
     pub fn new() -> Self {
         Self {
-            data: Mutex::new("Hi".to_string()),
+            gwty: Gateway::new(),
         }
     }
-    pub fn say_hello(&self, name: String) -> String {
-        return format!("Hello {}", name);
+    pub fn say_hello(&self, name: String) {
+        println!("Henlo {}", name);
     }
 
-    pub fn set_data(&mut self, data: String) {
-        let mut state = self.data.lock().expect("Could not lock mutex");
-        *state = data;
+    pub fn get_stateway(&self) -> String {
+        self.gwty.get_data()
     }
 
-    pub fn get_data(&self) -> String {
-        self.data.lock().unwrap().to_string()
+    pub fn set_stateway(&mut self, data: String) {
+        self.gwty.set_data(data)
     }
 }

@@ -45,7 +45,11 @@ impl HandlerTrait for Handler {
 
         // self.clone().ctrl.clone().get_data(); Need to call this function
 
-        self.ctrl.get_data();
+        // self.ctrl.set_stateway(req.name.to_string());
+
+        self.ctrl.set_stateway(req.name.to_string());
+
+        self.ctrl.get_stateway();
 
         // *(&self.clone()).ctrl.clone().get_data();
 

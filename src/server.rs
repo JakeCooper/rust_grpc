@@ -1,4 +1,5 @@
 mod controllers;
+mod gateways;
 mod handlers;
 
 #[tokio::main]
