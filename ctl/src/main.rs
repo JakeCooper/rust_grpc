@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use rust_proxy::proxy_client::ProxyClient;
 
-use rust_proxy::{AddRouteRequest, ListRoutesRequest, Route};
+use rust_proxy::{AddRouteRequest, ListRoutesRequest};
 
 use tonic::transport::Channel;
 use tonic::Request;
@@ -31,7 +31,7 @@ async fn handle_add(matches: &ArgMatches) -> Result<()> {
     Ok(())
 }
 
-async fn handle_list(matches: &ArgMatches) -> Result<()> {
+async fn handle_list(_matches: &ArgMatches) -> Result<()> {
     let mut client = new_client().await?;
 
     let request = Request::new(ListRoutesRequest {});
@@ -113,11 +113,11 @@ async fn main() -> Result<()> {
         .subcommand(App::new("list"))
         .subcommand(
             App::new("remove").arg(
-                Arg::new("from")
-                    .short('f')
-                    .long("from")
-                    .value_name("FROM")
-                    .help("The address we're proxying from")
+                Arg::new("uuid")
+                    .short('u')
+                    .long("uuid")
+                    .value_name("UUID")
+                    .help("The ID of the route to be removed")
                     .takes_value(true)
                     .required(true),
             ),
