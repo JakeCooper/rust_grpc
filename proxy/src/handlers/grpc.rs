@@ -33,9 +33,9 @@ impl HandlerTrait for Handler {
     ) -> Result<Response<AddRouteResponse>, Status> {
         let req = request.into_inner();
 
-        self.ctrl.add(req.route.unwrap());
-
-        let response = AddRouteResponse {};
+        let response = AddRouteResponse {
+            uuid: self.ctrl.add(req),
+        };
 
         Ok(Response::new(response))
     }
@@ -55,7 +55,7 @@ impl HandlerTrait for Handler {
     ) -> Result<Response<RemoveRouteResponse>, Status> {
         let req = request.into_inner();
 
-        self.ctrl.remove(req.route.unwrap());
+        self.ctrl.remove(req.uuid);
         let response = RemoveRouteResponse {};
 
         return Ok(Response::new(response));

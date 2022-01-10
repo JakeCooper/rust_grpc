@@ -13,6 +13,7 @@ tokio = { version = "*", features = ["full"] }
 futures = { version = "*" }
 clap = "*"
 anyhow = "*"
+uuid = { version = "*", features = ["serde", "v4"] }
 
 [build-dependencies]
 tonic-build = "0.6"

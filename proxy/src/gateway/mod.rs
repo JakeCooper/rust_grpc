@@ -1,41 +1,101 @@
 use std::{collections::HashMap, sync::RwLock};
+use tokio::task::JoinHandle;
 
-pub type ContentMap = HashMap<String, String>;
-
-pub use crate::rust_proxy::Route;
-
-pub mod rust_proxy {
-    tonic::include_proto!("proxy");
+struct RoutingInfo {
+    from: String,
+    to: String,
+    handle: JoinHandle<()>,
 }
 
+use uuid::Uuid;
+
+type RoutingTable = HashMap<Uuid, RoutingInfo>;
+
+use tokio::io;
+
+use tokio::{
+    net::{TcpListener, TcpStream},
+    select,
+};
+
+use crate::rust_proxy::{AddRouteRequest, Route};
+
 pub struct Gateway {
-    data: RwLock<ContentMap>,
+    routing_table: RwLock<RoutingTable>,
+}
+
+async fn proxy(client: &str, server: &str) -> io::Result<()> {
+    let listener = TcpListener::bind(client).await?;
+    loop {
+        let (eyeball, _) = listener.accept().await?;
+        let origin = TcpStream::connect(server).await?;
+
+        let (mut eread, mut ewrite) = eyeball.into_split();
+        let (mut oread, mut owrite) = origin.into_split();
+
+        let e2o = tokio::spawn(async move { io::copy(&mut eread, &mut owrite).await });
+        let o2e = tokio::spawn(async move { io::copy(&mut oread, &mut ewrite).await });
+
+        select! {
+                _ = e2o => println!("e2o done"),
+                _ = o2e => println!("o2e done"),
+
+        }
+    }
 }
 
 impl Gateway {
     pub fn new() -> Self {
         Self {
-            data: RwLock::new(HashMap::new()),
+            routing_table: RwLock::new(HashMap::new()),
         }
     }
 
-    pub fn add(&self, route: Route) {
-        self.data.write().unwrap().insert(route.from, route.to);
+    pub fn add(&self, req: AddRouteRequest) -> String {
+        let uuid = uuid::Uuid::new_v4();
+
+        let from = req.from.to_string();
+        let to = req.to.to_string();
+
+        let handle = tokio::spawn(async move {
+            let from = req.from.to_string();
+            let to = req.to.to_string();
+            proxy(&from, &to).await.unwrap();
+        });
+
+        self.routing_table
+            .write()
+            .unwrap()
+            .insert(uuid, RoutingInfo { from, to, handle });
+
+        uuid.to_string()
     }
 
     pub fn list(&self) -> Vec<Route> {
-        self.data
+        self.routing_table
             .read()
             .expect("Poisoned Read!")
             .iter()
-            .map(|(from, to)| Route {
-                from: from.to_string(),
-                to: to.to_string(),
+            .map(|(k, routing_info)| Route {
+                from: routing_info.from.to_string(),
+                to: routing_info.to.to_string(),
+                uuid: k.to_string(),
             })
             .collect()
     }
 
-    pub fn remove(&self, route: Route) {
-        self.data.write().unwrap().remove(&route.from);
+    pub fn remove(&self, uuid: String) {
+        self.routing_table
+            .read()
+            .unwrap()
+            .get(&Uuid::parse_str(&uuid).unwrap())
+            .unwrap()
+            .handle
+            .abort();
+
+        self.routing_table
+            .write()
+            .unwrap()
+            .remove(&Uuid::parse_str(&uuid).unwrap());
     }
 }

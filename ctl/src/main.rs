@@ -25,9 +25,7 @@ async fn handle_add(matches: &ArgMatches) -> Result<()> {
     let from = matches.value_of("from").unwrap().to_string();
     let to = matches.value_of("to").unwrap().to_string();
 
-    let request = Request::new(AddRouteRequest {
-        route: Option::from(Route { from, to }),
-    });
+    let request = Request::new(AddRouteRequest { from, to });
 
     client.add_route(request).await?;
     Ok(())
@@ -58,18 +56,15 @@ async fn handle_list(matches: &ArgMatches) -> Result<()> {
 async fn handle_remove(matches: &ArgMatches) -> Result<()> {
     let mut client = new_client().await?;
 
-    let from = &matches.value_of("from").unwrap().to_string();
+    let uuid = &matches.value_of("uuid").unwrap().to_string();
 
     let request = Request::new(RemoveRouteRequest {
-        route: Some(Route {
-            from: from.to_string(),
-            to: "".to_string(),
-        }),
+        uuid: uuid.to_string(),
     });
 
     client.remove_route(request).await?;
 
-    println!("Route removed {}", from.to_string());
+    println!("Route removed {}", uuid.to_string());
 
     Ok(())
 }

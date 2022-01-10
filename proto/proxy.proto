@@ -8,10 +8,13 @@ service Proxy {
 }
 
 message AddRouteRequest {
-    Route route = 1;
+    string from = 1;
+    string to = 2;
 }
 
-message AddRouteResponse {}
+message AddRouteResponse {
+    string uuid = 1;
+}
 
 message ListRoutesRequest {}
 
@@ -20,12 +23,13 @@ message ListRoutesResponse {
 }
 
 message Route {
-    string from = 1;
-    string to = 2;
+    string uuid = 1;
+    string from = 2;
+    string to = 3;
 }
 
 message RemoveRouteRequest {
-    Route route = 1;
+    string uuid = 1;
 }
 
 message RemoveRouteResponse {}
