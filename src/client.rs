@@ -2,12 +2,12 @@ use clap::{App, Arg, ArgMatches, SubCommand};
 
 use anyhow::Result;
 
-use hello_world::HelloRequest;
-use hello_world::{proxy_client::ProxyClient, HelloReply};
+use rust_proxy::HelloRequest;
+use rust_proxy::{proxy_client::ProxyClient, HelloReply};
 
 use tonic::{Request, Response, Status};
 
-pub mod hello_world {
+pub mod rust_proxy {
     tonic::include_proto!("proxy");
 }
 

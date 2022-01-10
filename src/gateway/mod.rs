@@ -1,29 +1,25 @@
-use std::sync::RwLock;
+use std::{collections::HashMap, sync::RwLock};
 
-type Core = String;
+pub type ContentMap = HashMap<String, String>;
 
 pub struct Gateway {
     prefix: String,
-    data: RwLock<Option<Core>>,
+    data: RwLock<ContentMap>,
 }
 
 impl Gateway {
     pub fn new() -> Self {
         Self {
             prefix: "Hello ".to_string(),
-            data: RwLock::new(None),
+            data: RwLock::new(HashMap::new()),
         }
     }
 
-    pub fn mutate(&self, some_data: Core) {
-        let mut state = self.data.write().expect("Could not lock");
-        *state = Some(some_data)
+    pub fn add(&self, from: String, to: String) {
+        self.data.write().unwrap().insert(from, to);
     }
 
-    pub fn read(&self) -> Core {
-        match self.data.read().unwrap().as_ref() {
-            None => "First!".to_string(),
-            Some(name) => self.prefix.to_string() + name,
-        }
+    pub fn list(&self) -> ContentMap {
+        self.data.read().unwrap().clone()
     }
 }

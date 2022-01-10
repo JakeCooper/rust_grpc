@@ -1,14 +1,12 @@
-use hello_world::proxy_server::{Proxy as HandlerTrait, ProxyServer};
-use hello_world::{HelloReply, HelloRequest};
-
-use std::collections::HashMap;
+use rust_proxy::proxy_server::{Proxy as HandlerTrait, ProxyServer};
+use rust_proxy::{AddRouteRequest, AddRouteResponse, HelloReply, HelloRequest};
 
 use tonic::async_trait;
 use tonic::{transport::Server, Request, Response, Status};
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
-pub mod hello_world {
+pub mod rust_proxy {
     tonic::include_proto!("proxy");
 }
 
@@ -35,14 +33,25 @@ impl HandlerTrait for Handler {
     ) -> Result<Response<HelloReply>, Status> {
         let req = request.into_inner();
 
-        self.ctrl.mutate(req.name.to_string());
-        println!("{}", self.ctrl.read());
+        println!("Saying hello to {}", req.name);
 
-        let reply = hello_world::HelloReply {
+        let reply = rust_proxy::HelloReply {
             message: format!("Hello {}!", req.name),
         };
 
         Ok(Response::new(reply))
+    }
+    async fn add_route(
+        &self,
+        request: Request<AddRouteRequest>,
+    ) -> Result<Response<AddRouteResponse>, Status> {
+        let req = request.into_inner();
+
+        self.ctrl.add(req.from, req.to);
+
+        let response = rust_proxy::AddRouteResponse {};
+
+        Ok(Response::new(response))
     }
 }
 

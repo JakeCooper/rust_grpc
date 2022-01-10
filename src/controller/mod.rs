@@ -1,3 +1,5 @@
+use crate::gateway::ContentMap;
+
 use super::gateway::Gateway;
 
 pub struct Controller {
@@ -11,11 +13,11 @@ impl Controller {
         }
     }
 
-    pub fn mutate(&self, data: String) {
-        self.gtwy.mutate(data)
+    pub fn add(&self, from: String, to: String) {
+        self.gtwy.add(from, to)
     }
 
-    pub fn read(&self) -> String {
-        self.gtwy.read()
+    pub fn read(&self) -> ContentMap {
+        self.gtwy.list()
     }
 }

@@ -2,12 +2,20 @@ syntax = "proto3";
 package proxy;
 
 service Proxy {
+    rpc AddRoute(AddRouteRequest) returns (AddRouteResponse);
     rpc SayHello (HelloRequest) returns (HelloReply);
 }
 
 message HelloRequest {
    string name = 1;
 }
+
+message AddRouteRequest {
+    string from = 1;
+    string to = 2;
+}
+
+message AddRouteResponse {}
 
 message HelloReply {
     string message = 1;

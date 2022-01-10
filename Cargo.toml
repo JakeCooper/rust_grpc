@@ -1,5 +1,5 @@
 [package]
-name = "helloworld"
+name = "rust_proxy"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,12 +15,12 @@ clap = "*"
 anyhow = "*"
 
 
-[[bin]] # Bin to run the HelloWorld gRPC server
-name = "helloworld-server"
+[[bin]] # Bin to run the rust proxy gRPC server
+name = "rp-server"
 path = "src/server.rs"
 
-[[bin]] # Bin to run the HelloWorld gRPC client
-name = "helloworld-client"
+[[bin]] # Bin to run the CLI gRPC client
+name = "rp-ctl"
 path = "src/client.rs"
 
 [build-dependencies]
