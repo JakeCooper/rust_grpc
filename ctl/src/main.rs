@@ -1,4 +1,4 @@
-use clap::{App, Arg, ArgMatches, SubCommand};
+use clap::{App, Arg, ArgMatches};
 
 use anyhow::Result;
 
@@ -37,7 +37,7 @@ async fn handle_matches(matches: ArgMatches) -> Result<()> {
     match matches.subcommand().unwrap() {
         ("add", v) => handle_add(v).await,
         ("hello", v) => handle_hello(v).await,
-        v => handle_default(&matches).await,
+        (_, v) => handle_default(v).await,
     }
 }
 
@@ -45,7 +45,7 @@ async fn handle_matches(matches: ArgMatches) -> Result<()> {
 async fn main() -> Result<()> {
     let matches = App::new("proxy_ctl")
         .version("0.1")
-        .author("Zeke M. <jake@railway.app>")
+        .author("Jake C. <jake@railway.app>")
         .about("a simple, dynamic, proxy with GRPC API")
         .subcommand(
             App::new("add")
