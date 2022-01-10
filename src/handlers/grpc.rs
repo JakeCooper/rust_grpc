@@ -18,14 +18,12 @@ use super::super::controller::Controller;
 
 // #[derive(Debug)]
 pub struct Handler {
-    data: Data,
     ctrl: Arc<Controller>,
 }
 
 impl Handler {
     fn new() -> Self {
         Self {
-            data: Mutex::new(HashMap::new()),
             ctrl: Arc::new(Controller::new()),
         }
     }
@@ -39,9 +37,8 @@ impl HandlerTrait for Handler {
     ) -> Result<Response<HelloReply>, Status> {
         let req = request.into_inner();
 
-        println!("{}", self.ctrl.read());
-
         self.ctrl.mutate(req.name.to_string());
+        println!("{}", self.ctrl.read());
 
         let reply = hello_world::HelloReply {
             message: format!("Hello {}!", req.name),
