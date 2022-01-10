@@ -8,10 +8,12 @@ edition = "2021"
 [dependencies]
 tonic = "*"
 warp = "*"
-primes = "*"
 prost = "*"
 tokio = { version = "*", features = ["full"] }
 futures = { version = "*" }
+clap = "*"
+anyhow = "*"
+
 
 [[bin]] # Bin to run the HelloWorld gRPC server
 name = "helloworld-server"
