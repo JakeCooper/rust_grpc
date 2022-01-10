@@ -1,27 +1,6 @@
-[package]
-name = "rust_proxy"
-version = "0.1.0"
-edition = "2021"
+[workspace]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-tonic = "*"
-warp = "*"
-prost = "*"
-tokio = { version = "*", features = ["full"] }
-futures = { version = "*" }
-clap = "*"
-anyhow = "*"
-
-
-[[bin]] # Bin to run the rust proxy gRPC server
-name = "rp-server"
-path = "src/server.rs"
-
-[[bin]] # Bin to run the CLI gRPC client
-name = "rp-ctl"
-path = "src/client.rs"
-
-[build-dependencies]
-tonic-build = "0.6"
+members = [
+    "ctl",
+    "proxy",
+]

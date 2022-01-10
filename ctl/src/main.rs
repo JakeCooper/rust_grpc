@@ -11,7 +11,7 @@ pub mod rust_proxy {
     tonic::include_proto!("proxy");
 }
 
-async fn handle_hello(matches: &ArgMatches<'static>) -> Result<()> {
+async fn handle_hello(matches: &ArgMatches) -> Result<()> {
     println!("Hello used! Firing Client Request");
 
     let mut client = ProxyClient::connect("http://0.0.0.0:50051").await.unwrap();
@@ -23,21 +23,21 @@ async fn handle_hello(matches: &ArgMatches<'static>) -> Result<()> {
     Ok(())
 }
 
-async fn handle_add(matches: &ArgMatches<'static>) -> Result<()> {
+async fn handle_add(matches: &ArgMatches) -> Result<()> {
     println!("Not implemented! {:?}", matches);
     Ok(())
 }
 
-async fn handle_default(matches: &ArgMatches<'static>) -> Result<()> {
+async fn handle_default(matches: &ArgMatches) -> Result<()> {
     println!("Not implemented! {:?}", matches);
     Ok(())
 }
 
-async fn handle_matches(matches: ArgMatches<'static>) -> Result<()> {
-    match matches.subcommand() {
-        ("add", Some(v)) => handle_add(v).await,
-        ("hello", Some(v)) => handle_hello(v).await,
-        _ => handle_default(&matches).await,
+async fn handle_matches(matches: ArgMatches) -> Result<()> {
+    match matches.subcommand().unwrap() {
+        ("add", v) => handle_add(v).await,
+        ("hello", v) => handle_hello(v).await,
+        v => handle_default(&matches).await,
     }
 }
 
@@ -48,10 +48,10 @@ async fn main() -> Result<()> {
         .author("Zeke M. <jake@railway.app>")
         .about("a simple, dynamic, proxy with GRPC API")
         .subcommand(
-            SubCommand::with_name("add")
+            App::new("add")
                 .arg(
-                    Arg::with_name("from")
-                        .short("f")
+                    Arg::new("from")
+                        .short('f')
                         .long("from")
                         .value_name("FROM")
                         .help("The address we're proxying from")
@@ -59,8 +59,8 @@ async fn main() -> Result<()> {
                         .required(true),
                 )
                 .arg(
-                    Arg::with_name("to")
-                        .short("t")
+                    Arg::new("to")
+                        .short('t')
                         .long("to")
                         .value_name("to")
                         .help("The address we're proxying to")
@@ -69,9 +69,9 @@ async fn main() -> Result<()> {
                 ),
         )
         .subcommand(
-            SubCommand::with_name("hello").arg(
-                Arg::with_name("name")
-                    .short("n")
+            App::new("hello").arg(
+                Arg::new("name")
+                    .short('n')
                     .long("name")
                     .value_name("NAME")
                     .help("The person you wanna say hello to")
@@ -79,7 +79,7 @@ async fn main() -> Result<()> {
                     .required(true),
             ),
         )
-        .subcommand(SubCommand::with_name("list"))
+        .subcommand(App::new("list"))
         // .arg(
         //     Arg::with_name("server")
         //         .short("s")
