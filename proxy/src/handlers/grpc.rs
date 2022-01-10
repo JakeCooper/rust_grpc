@@ -1,14 +1,14 @@
-use rust_proxy::proxy_server::{Proxy as HandlerTrait, ProxyServer};
-use rust_proxy::{AddRouteRequest, AddRouteResponse, HelloReply, HelloRequest};
-
 use tonic::async_trait;
 use tonic::{transport::Server, Request, Response, Status};
 
 use std::sync::Arc;
 
-pub mod rust_proxy {
-    tonic::include_proto!("proxy");
-}
+use crate::rust_proxy::{
+    AddRouteRequest, AddRouteResponse, ListRoutesRequest, ListRoutesResponse, RemoveRouteRequest,
+    RemoveRouteResponse,
+};
+
+use crate::rust_proxy::proxy_server::{Proxy as HandlerTrait, ProxyServer};
 
 use super::super::controller::Controller;
 
@@ -27,31 +27,38 @@ impl Handler {
 
 #[async_trait]
 impl HandlerTrait for Handler {
-    async fn say_hello(
-        &self,
-        request: Request<HelloRequest>,
-    ) -> Result<Response<HelloReply>, Status> {
-        let req = request.into_inner();
-
-        println!("Saying hello to {}", req.name);
-
-        let reply = rust_proxy::HelloReply {
-            message: format!("Hello {}!", req.name),
-        };
-
-        Ok(Response::new(reply))
-    }
     async fn add_route(
         &self,
         request: Request<AddRouteRequest>,
     ) -> Result<Response<AddRouteResponse>, Status> {
         let req = request.into_inner();
 
-        self.ctrl.add(req.from, req.to);
+        self.ctrl.add(req.route.unwrap());
 
-        let response = rust_proxy::AddRouteResponse {};
+        let response = AddRouteResponse {};
 
         Ok(Response::new(response))
+    }
+    async fn list_routes(
+        &self,
+        _request: Request<ListRoutesRequest>,
+    ) -> Result<Response<ListRoutesResponse>, Status> {
+        let routes = self.ctrl.list();
+
+        let response = ListRoutesResponse { route: routes };
+
+        Ok(Response::new(response))
+    }
+    async fn remove_route(
+        &self,
+        request: Request<RemoveRouteRequest>,
+    ) -> Result<Response<RemoveRouteResponse>, Status> {
+        let req = request.into_inner();
+
+        self.ctrl.remove(req.route.unwrap());
+        let response = RemoveRouteResponse {};
+
+        return Ok(Response::new(response));
     }
 }
 

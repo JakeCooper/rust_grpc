@@ -3,20 +3,29 @@ package proxy;
 
 service Proxy {
     rpc AddRoute(AddRouteRequest) returns (AddRouteResponse);
-    rpc SayHello (HelloRequest) returns (HelloReply);
+    rpc ListRoutes(ListRoutesRequest) returns (ListRoutesResponse);
+    rpc RemoveRoute(RemoveRouteRequest) returns (RemoveRouteResponse);
 }
 
 message AddRouteRequest {
-    string from = 1;
-    string to = 2;
+    Route route = 1;
 }
 
 message AddRouteResponse {}
 
-message HelloRequest {
-   string name = 1;
+message ListRoutesRequest {}
+
+message ListRoutesResponse {
+    repeated Route route = 1;
 }
 
-message HelloReply {
-    string message = 1;
+message Route {
+    string from = 1;
+    string to = 2;
 }
+
+message RemoveRouteRequest {
+    Route route = 1;
+}
+
+message RemoveRouteResponse {}
