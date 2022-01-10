@@ -6,16 +6,16 @@ service Proxy {
     rpc SayHello (HelloRequest) returns (HelloReply);
 }
 
-message HelloRequest {
-   string name = 1;
-}
-
 message AddRouteRequest {
     string from = 1;
     string to = 2;
 }
 
 message AddRouteResponse {}
+
+message HelloRequest {
+   string name = 1;
+}
 
 message HelloReply {
     string message = 1;
