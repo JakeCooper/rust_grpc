@@ -67,7 +67,6 @@ impl Gateway {
         let to = req.to.clone();
 
         let handle = tokio::spawn(async move {
-            // TODO Handle error for port already in use and return it
             proxy(&listener, &to).await.unwrap();
         });
 
