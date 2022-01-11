@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 use super::gateway::Gateway;
 
 use crate::rust_proxy::{AddRouteRequest, Route};
@@ -13,8 +15,8 @@ impl Controller {
         }
     }
 
-    pub fn add(&self, req: AddRouteRequest) -> String {
-        self.gtwy.add(req)
+    pub async fn add(&self, req: AddRouteRequest) -> Result<String> {
+        self.gtwy.add(req).await
     }
 
     pub fn list(&self) -> Vec<Route> {

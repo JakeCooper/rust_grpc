@@ -33,11 +33,10 @@ impl HandlerTrait for Handler {
     ) -> Result<Response<AddRouteResponse>, Status> {
         let req = request.into_inner();
 
-        let response = AddRouteResponse {
-            uuid: self.ctrl.add(req),
-        };
-
-        Ok(Response::new(response))
+        match self.ctrl.add(req).await {
+            Ok(uuid) => Ok(Response::new(AddRouteResponse { uuid })),
+            Err(e) => Err(Status::invalid_argument(e.to_string())),
+        }
     }
     async fn list_routes(
         &self,

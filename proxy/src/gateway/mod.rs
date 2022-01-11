@@ -43,9 +43,7 @@ async fn transfer(mut inbound: TcpStream, proxy_addr: String) -> Result<()> {
     Ok(())
 }
 
-async fn proxy(client: &str, server: &str) -> Result<()> {
-    let listener = TcpListener::bind(client).await?;
-
+async fn proxy(listener: &TcpListener, server: &str) -> Result<()> {
     while let Ok((inbound, _)) = listener.accept().await {
         let transfer = transfer(inbound, server.to_string());
 
@@ -62,24 +60,27 @@ impl Gateway {
         }
     }
 
-    pub fn add(&self, req: AddRouteRequest) -> String {
+    pub async fn add(&self, req: AddRouteRequest) -> Result<String> {
         let uuid = uuid::Uuid::new_v4();
 
-        let from = req.from.to_string();
-        let to = req.to.to_string();
+        let listener = TcpListener::bind(&req.from).await?;
+        let to = req.to.clone();
 
         let handle = tokio::spawn(async move {
-            let from = req.from.to_string();
-            let to = req.to.to_string();
-            proxy(&from, &to).await.unwrap();
+            // TODO Handle error for port already in use and return it
+            proxy(&listener, &to).await.unwrap();
         });
 
-        self.routing_table
-            .write()
-            .unwrap()
-            .insert(uuid, RoutingInfo { from, to, handle });
+        self.routing_table.write().unwrap().insert(
+            uuid,
+            RoutingInfo {
+                from: req.from,
+                to: req.to,
+                handle,
+            },
+        );
 
-        uuid.to_string()
+        Ok(uuid.to_string())
     }
 
     pub fn list(&self) -> Vec<Route> {
