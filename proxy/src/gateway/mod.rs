@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::{collections::HashMap, sync::RwLock};
 use tokio::task::JoinHandle;
 
@@ -11,12 +12,9 @@ use uuid::Uuid;
 
 type RoutingTable = HashMap<Uuid, RoutingInfo>;
 
-use tokio::io;
+use tokio::io::{self, AsyncWriteExt};
 
-use tokio::{
-    net::{TcpListener, TcpStream},
-    select,
-};
+use tokio::net::{TcpListener, TcpStream};
 
 use crate::rust_proxy::{AddRouteRequest, Route};
 
@@ -24,24 +22,37 @@ pub struct Gateway {
     routing_table: RwLock<RoutingTable>,
 }
 
-async fn proxy(client: &str, server: &str) -> io::Result<()> {
+async fn transfer(mut inbound: TcpStream, proxy_addr: String) -> Result<()> {
+    let mut outbound = TcpStream::connect(proxy_addr).await?;
+
+    let (mut ri, mut wi) = inbound.split();
+    let (mut ro, mut wo) = outbound.split();
+
+    let client_to_server = async {
+        io::copy(&mut ri, &mut wo).await?;
+        (&mut wo).shutdown().await
+    };
+
+    let server_to_client = async {
+        io::copy(&mut ro, &mut wi).await?;
+        (&mut wi).shutdown().await
+    };
+
+    tokio::try_join!(client_to_server, server_to_client)?;
+
+    Ok(())
+}
+
+async fn proxy(client: &str, server: &str) -> Result<()> {
     let listener = TcpListener::bind(client).await?;
-    loop {
-        let (eyeball, _) = listener.accept().await?;
-        let origin = TcpStream::connect(server).await?;
 
-        let (mut eread, mut ewrite) = eyeball.into_split();
-        let (mut oread, mut owrite) = origin.into_split();
+    while let Ok((inbound, _)) = listener.accept().await {
+        let transfer = transfer(inbound, server.to_string());
 
-        let e2o = tokio::spawn(async move { io::copy(&mut eread, &mut owrite).await });
-        let o2e = tokio::spawn(async move { io::copy(&mut oread, &mut ewrite).await });
-
-        select! {
-                _ = e2o => println!("e2o done"),
-                _ = o2e => println!("o2e done"),
-
-        }
+        tokio::spawn(transfer);
     }
+
+    Ok(())
 }
 
 impl Gateway {
