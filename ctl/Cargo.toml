@@ -7,12 +7,13 @@ edition = "2021"
 
 [dependencies]
 tonic = "*"
-warp = "*"
 prost = "*"
 tokio = { version = "*", features = ["full"] }
 futures = { version = "*" }
 clap = "*"
 anyhow = "*"
+serde_json = "*"
+serde = {version = "*", features = ["derive"]}
 
 [build-dependencies]
-tonic-build = "0.6"
+tonic-build = "*"

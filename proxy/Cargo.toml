@@ -7,13 +7,11 @@ edition = "2021"
 
 [dependencies]
 tonic = "*"
-warp = "*"
 prost = "*"
 tokio = { version = "*", features = ["full"] }
-futures = { version = "*" }
-clap = "*"
 anyhow = "*"
 uuid = { version = "*", features = ["serde", "v4"] }
+bollard = "*"
 
 [build-dependencies]
-tonic-build = "0.6"
+tonic-build = "*"

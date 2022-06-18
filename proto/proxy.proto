@@ -5,6 +5,28 @@ service Proxy {
     rpc AddRoute(AddRouteRequest) returns (AddRouteResponse);
     rpc ListRoutes(ListRoutesRequest) returns (ListRoutesResponse);
     rpc RemoveRoute(RemoveRouteRequest) returns (RemoveRouteResponse);
+    rpc ListContainers(ListContainersRequest) returns (ListContainersResponse);
+    rpc Version(VersionRequest) returns (VersionResponse);
+}
+
+message VersionRequest {}
+
+message VersionResponse {
+    string version = 1;
+}
+
+message ListContainersRequest {
+    bool all = 1;
+}
+
+message Container {
+    string id = 1;
+    string status = 2;
+    string image = 3;
+}
+
+message ListContainersResponse {
+    repeated Container containers = 1;
 }
 
 message AddRouteRequest {
@@ -19,7 +41,7 @@ message AddRouteResponse {
 message ListRoutesRequest {}
 
 message ListRoutesResponse {
-    repeated Route route = 1;
+    repeated Route routes = 1;
 }
 
 message Route {

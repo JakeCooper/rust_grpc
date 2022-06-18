@@ -4,23 +4,28 @@ use tonic::{transport::Server, Request, Response, Status};
 use std::sync::Arc;
 
 use crate::rust_proxy::{
-    AddRouteRequest, AddRouteResponse, ListRoutesRequest, ListRoutesResponse, RemoveRouteRequest,
-    RemoveRouteResponse,
+    AddRouteRequest, AddRouteResponse, ListContainersRequest, ListContainersResponse,
+    ListRoutesRequest, ListRoutesResponse, RemoveRouteRequest, RemoveRouteResponse, VersionRequest,
+    VersionResponse,
 };
 
 use crate::rust_proxy::proxy_server::{Proxy as HandlerTrait, ProxyServer};
 
-use super::super::controller::Controller;
+use super::super::controller::{
+    containers::Controller as ContainerController, proxy::Controller as ProxyController,
+};
 
 // #[derive(Debug)]
 pub struct Handler {
-    ctrl: Arc<Controller>,
+    container_ctrl: Arc<ContainerController>,
+    proxy_ctrl: Arc<ProxyController>,
 }
 
 impl Handler {
     fn new() -> Self {
         Self {
-            ctrl: Arc::new(Controller::new()),
+            container_ctrl: Arc::new(ContainerController::new()),
+            proxy_ctrl: Arc::new(ProxyController::new()),
         }
     }
 }
@@ -33,7 +38,7 @@ impl HandlerTrait for Handler {
     ) -> Result<Response<AddRouteResponse>, Status> {
         let req = request.into_inner();
 
-        match self.ctrl.add(req).await {
+        match self.proxy_ctrl.add(req).await {
             Ok(uuid) => Ok(Response::new(AddRouteResponse { uuid })),
             Err(e) => Err(Status::invalid_argument(e.to_string())),
         }
@@ -42,9 +47,9 @@ impl HandlerTrait for Handler {
         &self,
         _request: Request<ListRoutesRequest>,
     ) -> Result<Response<ListRoutesResponse>, Status> {
-        let routes = self.ctrl.list();
+        let routes = self.proxy_ctrl.list();
 
-        let response = ListRoutesResponse { route: routes };
+        let response = ListRoutesResponse { routes };
 
         Ok(Response::new(response))
     }
@@ -54,10 +59,29 @@ impl HandlerTrait for Handler {
     ) -> Result<Response<RemoveRouteResponse>, Status> {
         let req = request.into_inner();
 
-        self.ctrl.remove(req.uuid);
+        self.proxy_ctrl.remove(req.uuid);
         let response = RemoveRouteResponse {};
 
         return Ok(Response::new(response));
+    }
+    async fn list_containers(
+        &self,
+        request: Request<ListContainersRequest>,
+    ) -> Result<Response<ListContainersResponse>, Status> {
+        let req = request.into_inner();
+
+        let containers = self.container_ctrl.list(req.all).await;
+
+        let response = ListContainersResponse { containers };
+        Ok(Response::new(response))
+    }
+    async fn version(
+        &self,
+        _request: Request<VersionRequest>,
+    ) -> Result<Response<VersionResponse>, Status> {
+        let version = self.container_ctrl.version().await;
+        let response = VersionResponse { version };
+        Ok(Response::new(response))
     }
 }
 
